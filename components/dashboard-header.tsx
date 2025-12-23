@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,76 +10,77 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LayoutDashboard, Package, User, Settings, LogOut } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { NotificationsDropdown } from "@/components/notifications-dropdown"
-import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
-import { useProfile } from "@/lib/contexts/profile-context"
-import { SettingsDialog } from "@/components/settings-dialog"
-import { GuidedTour } from "@/components/guided-tour"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LayoutDashboard, Package, User, Settings, LogOut } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
+import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { useProfile } from "@/lib/contexts/profile-context";
+import { SettingsDialog } from "@/components/settings-dialog";
+import { GuidedTour } from "@/components/guided-tour";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Inventário", href: "/inventory", icon: Package },
   { name: "Perfil", href: "/profile", icon: User },
-]
+];
 
 export function DashboardHeader() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const { userProfile, refreshProfiles, isLoading } = useProfile()
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const [runTour, setRunTour] = useState(false)
+  const pathname = usePathname();
+  const router = useRouter();
+  const { userProfile, refreshProfiles, isLoading } = useProfile();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [runTour, setRunTour] = useState(false);
 
   useEffect(() => {
-    refreshProfiles()
-    checkAndStartTour()
-  }, [refreshProfiles])
+    refreshProfiles();
+    checkAndStartTour();
+  }, [refreshProfiles]);
 
   const checkAndStartTour = async () => {
     try {
-      const response = await fetch("/api/settings")
+      const response = await fetch("/api/settings");
       if (response.ok) {
-        const settings = await response.json()
+        const settings = await response.json();
         if (settings.guided_mode) {
-          setTimeout(() => setRunTour(true), 1000)
+          setTimeout(() => setRunTour(true), 1000);
         }
       }
     } catch (error) {
-      console.error("[v0] Error checking tour settings:", error)
+      console.error("[v0] Error checking tour settings:", error);
     }
-  }
+  };
 
   const handleTourComplete = async () => {
-    setRunTour(false)
+    setRunTour(false);
     try {
       await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ guided_mode: false }),
-      })
+      });
     } catch (error) {
-      console.error("[v0] Error updating tour settings:", error)
+      console.error("[v0] Error updating tour settings:", error);
     }
-  }
+  };
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" })
-      router.push("/auth/login")
-      router.refresh()
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/auth/login");
+      router.refresh();
     } catch (error) {
-      console.error("Error logging out:", error)
+      console.error("Error logging out:", error);
     }
-  }
+  };
 
-  const userName = userProfile?.full_name || userProfile?.email?.split("@")[0] || "Usuário"
-  const userEmail = userProfile?.email || ""
-  const avatarUrl = userProfile?.avatar_url || undefined
-  const userInitials = userName.substring(0, 2).toUpperCase()
+  const userName =
+    userProfile?.full_name || userProfile?.email?.split("@")[0] || "Usuário";
+  const userEmail = userProfile?.email || "";
+  const avatarUrl = userProfile?.avatar_url || undefined;
+  const userInitials = userName.substring(0, 2).toUpperCase();
 
   return (
     <>
@@ -90,24 +91,27 @@ export function DashboardHeader() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <Package className="h-5 w-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-xl">RestaurantOS</span>
+              <span className="font-bold text-xl">STEWARD RSI</span>
             </Link>
 
             <nav className="hidden md:flex items-center gap-1">
               {navigation.map((item) => {
-                const Icon = item.icon
-                const isActive = pathname === item.href
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
                 return (
                   <Link key={item.href} href={item.href}>
                     <Button
                       variant="ghost"
-                      className={cn("gap-2", isActive && "bg-secondary text-secondary-foreground")}
+                      className={cn(
+                        "gap-2",
+                        isActive && "bg-secondary text-secondary-foreground"
+                      )}
                     >
                       <Icon className="h-4 w-4" />
                       {item.name}
                     </Button>
                   </Link>
-                )
+                );
               })}
             </nav>
           </div>
@@ -133,7 +137,10 @@ export function DashboardHeader() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                <Button
+                  variant="ghost"
+                  className="relative h-10 w-10 rounded-full"
+                >
                   <Avatar>
                     <AvatarImage src={avatarUrl || "/placeholder.svg"} />
                     <AvatarFallback>{userInitials}</AvatarFallback>
@@ -143,7 +150,9 @@ export function DashboardHeader() {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{isLoading ? "Carregando..." : userName}</p>
+                    <p className="text-sm font-medium">
+                      {isLoading ? "Carregando..." : userName}
+                    </p>
                     <p className="text-xs text-muted-foreground">{userEmail}</p>
                   </div>
                 </DropdownMenuLabel>
@@ -159,7 +168,10 @@ export function DashboardHeader() {
                   Configurações
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive cursor-pointer" onClick={handleLogout}>
+                <DropdownMenuItem
+                  className="text-destructive cursor-pointer"
+                  onClick={handleLogout}
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sair
                 </DropdownMenuItem>
@@ -169,8 +181,12 @@ export function DashboardHeader() {
         </div>
       </header>
 
-      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} onStartTour={() => setRunTour(true)} />
+      <SettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        onStartTour={() => setRunTour(true)}
+      />
       <GuidedTour run={runTour} onComplete={handleTourComplete} />
     </>
-  )
+  );
 }
