@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +30,8 @@ const navigation = [
 ];
 
 export function DashboardHeader() {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const pathname = usePathname();
   const router = useRouter();
   const { userProfile, refreshProfiles, isLoading } = useProfile();
@@ -88,9 +92,13 @@ export function DashboardHeader() {
         <div className="container mx-auto flex h-16 items-center px-6">
           <div className="flex items-center gap-8">
             <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <Package className="h-5 w-5 text-primary-foreground" />
-              </div>
+              <Image
+                src="/LogoPrimario.svg"
+                alt="Logo STEWARD RSI"
+                width={60}
+                height={60}
+                className={`rounded-lg ${isDark ? "invert" : ""}`}
+              />
               <span className="font-bold text-xl">STEWARD RSI</span>
             </Link>
 

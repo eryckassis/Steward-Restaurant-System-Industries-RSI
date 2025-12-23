@@ -5,6 +5,7 @@ import { Landmark } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Activity } from "@/components/animate-ui/icons/activity";
 import { MessageSquareWarning } from "@/components/animate-ui/icons/message-square-warning";
+import { ClipboardList } from "@/components/animate-ui/icons/clipboard-list";
 
 // Ícone SVG customizado
 const StorefrontIcon = ({ className }: { className?: string }) => (
@@ -29,6 +30,10 @@ const WasteIcon = ({ className }: { className?: string }) => (
 
 const AlertIcon = ({ className }: { className?: string }) => (
   <MessageSquareWarning className={className} animateOnHover />
+);
+
+const Clipboard = ({ className }: { className?: string }) => (
+  <ClipboardList className={className} animateOnHover />
 );
 interface Stats {
   totalItems: number;
@@ -84,7 +89,7 @@ export function DashboardStats() {
       value: `R$ ${stats.totalValue}`,
       change: "Inventário total",
       trend: "up",
-      icon: Landmark,
+      icon: Clipboard,
     },
     {
       title: "Desperdício (30d)",
