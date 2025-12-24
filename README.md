@@ -1,4 +1,7 @@
-# RestaurantOS - Sistema de Gestão de Inventário
+<img width="1584" height="396" alt="Design sem nome (1)" src="https://github.com/user-attachments/assets/031eb32c-bfeb-4043-9441-666a1e6c7dbe" />
+
+
+# STEWARD  - RESTAURANT SYSTEM INDUSTRIES RSI
 
 Sistema completo de gerenciamento de inventário para restaurantes com autenticação, CRUD completo e análises em tempo real.
 
