@@ -118,7 +118,7 @@ export function NotificationsDropdown() {
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          <BellRing className="h-5 w-5" animate={isHovered} />
+          <BellRing className="h-5 w-5" animate={isHovered && !isOpen} />
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
