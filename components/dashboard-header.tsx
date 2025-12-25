@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserRound } from "./animate-ui/icons/user-round";
-import { LayoutDashboard, Package, User, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, LogOut } from "lucide-react";
 import { Settings } from "./animate-ui/icons/settings";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
@@ -28,39 +28,7 @@ import { GuidedTour } from "@/components/guided-tour";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Inventário", href: "/inventory", icon: Package },
-  { name: "Perfil", href: "/profile", icon: null },
 ];
-
-function NavLink({
-  item,
-  isActive,
-}: {
-  item: (typeof navigation)[0];
-  isActive: boolean;
-}) {
-  const [isHovered, setIsHovered] = useState(false);
-  const isProfile = item.name === "Perfil";
-  return (
-    <Link href={item.href}>
-      <Button
-        variant="ghost"
-        className={cn(
-          "gap-2",
-          isActive && "bg-secondary text-secondary-foreground"
-        )}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {isProfile ? (
-          <UserRound className="h-4 w-4" animate={isHovered} animation="path" />
-        ) : (
-          item.icon && <item.icon className="h-4 w-4" />
-        )}
-        {item.name}
-      </Button>
-    </Link>
-  );
-}
 
 export function DashboardHeader() {
   const { resolvedTheme } = useTheme();
@@ -70,6 +38,7 @@ export function DashboardHeader() {
   const { userProfile, refreshProfiles, isLoading } = useProfile();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [runTour, setRunTour] = useState(false);
+  const [isProfileHovered, setIsProfileHovered] = useState(false);
   const [isSettingsHovered, setIsSettingsHovered] = useState(false);
 
   useEffect(() => {
@@ -143,13 +112,44 @@ export function DashboardHeader() {
             </Link>
 
             <nav className="hidden md:flex items-center gap-1">
-              {navigation.map((item) => (
-                <NavLink
-                  key={item.href}
-                  item={item}
-                  isActive={pathname === item.href}
-                />
-              ))}
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "gap-2",
+                        pathname === item.href &&
+                          "bg-secondary text-secondary-foreground"
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.name}
+                    </Button>
+                  </Link>
+                );
+              })}
+
+              <Link href="/profile">
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "gap-2",
+                    pathname === "/profile" &&
+                      "bg-secondary text-secondary-foreground"
+                  )}
+                  onMouseEnter={() => setIsProfileHovered(true)}
+                  onMouseLeave={() => setIsProfileHovered(false)}
+                >
+                  <UserRound
+                    className="h-4 w-4"
+                    animate={isProfileHovered}
+                    animation="path"
+                  />
+                  Perfil
+                </Button>
+              </Link>
             </nav>
           </div>
 
@@ -201,7 +201,7 @@ export function DashboardHeader() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
+                    <UserRound className="mr-2 h-4 w-4" />
                     Perfil
                   </Link>
                 </DropdownMenuItem>
