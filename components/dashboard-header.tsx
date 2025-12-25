@@ -14,7 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LayoutDashboard, Package, User, LogOut } from "lucide-react";
+import { UserRound } from "./animate-ui/icons/user-round";
+import { LayoutDashboard, Package, LogOut } from "lucide-react";
 import { Settings } from "./animate-ui/icons/settings";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
@@ -27,7 +28,6 @@ import { GuidedTour } from "@/components/guided-tour";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Inventário", href: "/inventory", icon: Package },
-  { name: "Perfil", href: "/profile", icon: User },
 ];
 
 export function DashboardHeader() {
@@ -38,6 +38,7 @@ export function DashboardHeader() {
   const { userProfile, refreshProfiles, isLoading } = useProfile();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [runTour, setRunTour] = useState(false);
+  const [isProfileHovered, setIsProfileHovered] = useState(false);
   const [isSettingsHovered, setIsSettingsHovered] = useState(false);
 
   useEffect(() => {
@@ -113,14 +114,14 @@ export function DashboardHeader() {
             <nav className="hidden md:flex items-center gap-1">
               {navigation.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href;
                 return (
                   <Link key={item.href} href={item.href}>
                     <Button
                       variant="ghost"
                       className={cn(
                         "gap-2",
-                        isActive && "bg-secondary text-secondary-foreground"
+                        pathname === item.href &&
+                          "bg-secondary text-secondary-foreground"
                       )}
                     >
                       <Icon className="h-4 w-4" />
@@ -129,6 +130,26 @@ export function DashboardHeader() {
                   </Link>
                 );
               })}
+
+              <Link href="/profile">
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "gap-2",
+                    pathname === "/profile" &&
+                      "bg-secondary text-secondary-foreground"
+                  )}
+                  onMouseEnter={() => setIsProfileHovered(true)}
+                  onMouseLeave={() => setIsProfileHovered(false)}
+                >
+                  <UserRound
+                    className="h-4 w-4"
+                    animate={isProfileHovered}
+                    animation="path"
+                  />
+                  Perfil
+                </Button>
+              </Link>
             </nav>
           </div>
 
@@ -180,7 +201,7 @@ export function DashboardHeader() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
+                    <UserRound className="mr-2 h-4 w-4" />
                     Perfil
                   </Link>
                 </DropdownMenuItem>
