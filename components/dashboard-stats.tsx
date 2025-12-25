@@ -1,7 +1,6 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Landmark } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Activity } from "@/components/animate-ui/icons/activity";
 import { MessageSquareWarning } from "@/components/animate-ui/icons/message-square-warning";
