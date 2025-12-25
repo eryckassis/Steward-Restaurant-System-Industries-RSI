@@ -161,7 +161,7 @@ export function NotificationsDropdown() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <ScrollArea className="h-[300px]">
+        <ScrollArea className="h-75">
           {loading ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
               Carregando...
