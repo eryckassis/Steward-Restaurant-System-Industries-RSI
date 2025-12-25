@@ -14,7 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LayoutDashboard, Package, User, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, User, LogOut } from "lucide-react";
+import { Settings } from "./animate-ui/icons/settings";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ export function DashboardHeader() {
   const { userProfile, refreshProfiles, isLoading } = useProfile();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [runTour, setRunTour] = useState(false);
+  const [isSettingsHovered, setIsSettingsHovered] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -144,9 +146,14 @@ export function DashboardHeader() {
               size="icon"
               className="settings-button"
               onClick={() => setSettingsOpen(true)}
+              onMouseEnter={() => setIsSettingsHovered(true)}
+              onMouseLeave={() => setIsSettingsHovered(false)}
               title="Configurações"
             >
-              <Settings className="h-5 w-5" />
+              <Settings
+                className="h-5 w-5"
+                animate={isSettingsHovered && !settingsOpen}
+              />
             </Button>
 
             <DropdownMenu>
