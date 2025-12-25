@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserRound } from "./animate-ui/icons/user-round";
 import { LayoutDashboard, Package, User, LogOut } from "lucide-react";
 import { Settings } from "./animate-ui/icons/settings";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -27,8 +28,39 @@ import { GuidedTour } from "@/components/guided-tour";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Inventário", href: "/inventory", icon: Package },
-  { name: "Perfil", href: "/profile", icon: User },
+  { name: "Perfil", href: "/profile", icon: null },
 ];
+
+function NavLink({
+  item,
+  isActive,
+}: {
+  item: (typeof navigation)[0];
+  isActive: boolean;
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+  const isProfile = item.name === "Perfil";
+  return (
+    <Link href={item.href}>
+      <Button
+        variant="ghost"
+        className={cn(
+          "gap-2",
+          isActive && "bg-secondary text-secondary-foreground"
+        )}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {isProfile ? (
+          <UserRound className="h-4 w-4" animate={isHovered} animation="path" />
+        ) : (
+          item.icon && <item.icon className="h-4 w-4" />
+        )}
+        {item.name}
+      </Button>
+    </Link>
+  );
+}
 
 export function DashboardHeader() {
   const { resolvedTheme } = useTheme();
@@ -111,24 +143,13 @@ export function DashboardHeader() {
             </Link>
 
             <nav className="hidden md:flex items-center gap-1">
-              {navigation.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href;
-                return (
-                  <Link key={item.href} href={item.href}>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "gap-2",
-                        isActive && "bg-secondary text-secondary-foreground"
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {item.name}
-                    </Button>
-                  </Link>
-                );
-              })}
+              {navigation.map((item) => (
+                <NavLink
+                  key={item.href}
+                  item={item}
+                  isActive={pathname === item.href}
+                />
+              ))}
             </nav>
           </div>
 
