@@ -31,7 +31,7 @@ const navigation = [
 
 export function DashboardHeader() {
   const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { userProfile, refreshProfiles, isLoading } = useProfile();
@@ -39,6 +39,7 @@ export function DashboardHeader() {
   const [runTour, setRunTour] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     refreshProfiles();
     checkAndStartTour();
   }, [refreshProfiles]);
@@ -85,6 +86,7 @@ export function DashboardHeader() {
   const userEmail = userProfile?.email || "";
   const avatarUrl = userProfile?.avatar_url || undefined;
   const userInitials = userName.substring(0, 2).toUpperCase();
+  const isDark = resolvedTheme === "dark";
 
   return (
     <>
@@ -92,13 +94,17 @@ export function DashboardHeader() {
         <div className="container mx-auto flex h-16 items-center px-6">
           <div className="flex items-center gap-8">
             <Link href="/dashboard" className="flex items-center space-x-2">
-              <Image
-                src="/LogoPrimario.svg"
-                alt="Logo STEWARD RSI"
-                width={60}
-                height={60}
-                className={`rounded-lg ${isDark ? "invert" : ""}`}
-              />
+              {!mounted ? (
+                <div className="w-15 h-15 rounded-lg bg-muted animate-pulse" />
+              ) : (
+                <Image
+                  src="/LogoPrimario.svg"
+                  alt="Logo STEWARD RSI"
+                  width={60}
+                  height={60}
+                  className={`rounded-lg ${isDark ? "invert" : ""}`}
+                />
+              )}
               <span className="font-bold text-xl">STEWARD RSI</span>
             </Link>
 
