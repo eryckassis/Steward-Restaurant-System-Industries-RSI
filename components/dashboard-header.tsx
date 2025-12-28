@@ -232,5 +232,3 @@ export function DashboardHeader() {
     </>
   );
 }
-
-// continue in next day hehe
