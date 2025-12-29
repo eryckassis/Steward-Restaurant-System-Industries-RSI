@@ -1,27 +1,42 @@
-"use client"
+"use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MoreHorizontal, Pencil, Trash2, AlertCircle, RefreshCw, ArrowUpDown, Package } from "lucide-react"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  AlertCircle,
+  RefreshCw,
+  ArrowUpDown,
+  Package,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useEffect, useState, useCallback } from "react"
-import type { InventoryItem } from "@/lib/types"
-import { ItemDialog } from "./item-dialog"
-import { StockMovementDialog } from "./stock-movement-dialog"
-import { useToast } from "@/hooks/use-toast"
+} from "@/components/ui/dropdown-menu";
+import { useEffect, useState, useCallback } from "react";
+import type { InventoryItem } from "@/lib/types";
+import { ItemDialog } from "./item-dialog";
+import { StockMovementDialog } from "./stock-movement-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface InventoryTableProps {
-  searchQuery?: string
-  categoryFilter?: string
-  statusFilter?: string
+  searchQuery?: string;
+  categoryFilter?: string;
+  statusFilter?: string;
 }
 
 export function InventoryTable({
@@ -29,114 +44,117 @@ export function InventoryTable({
   categoryFilter = "all",
   statusFilter = "all",
 }: InventoryTableProps) {
-  const [items, setItems] = useState<InventoryItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [movementItem, setMovementItem] = useState<InventoryItem | null>(null)
-  const [isMovementDialogOpen, setIsMovementDialogOpen] = useState(false)
-  const { toast } = useToast()
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [movementItem, setMovementItem] = useState<InventoryItem | null>(null);
+  const [isMovementDialogOpen, setIsMovementDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const fetchItems = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
-      const params = new URLSearchParams()
-      if (searchQuery) params.append("search", searchQuery)
-      if (categoryFilter && categoryFilter !== "all") params.append("category", categoryFilter)
-      if (statusFilter && statusFilter !== "all") params.append("status", statusFilter)
+      const params = new URLSearchParams();
+      if (searchQuery) params.append("search", searchQuery);
+      if (categoryFilter && categoryFilter !== "all")
+        params.append("category", categoryFilter);
+      if (statusFilter && statusFilter !== "all")
+        params.append("status", statusFilter);
 
-      const response = await fetch(`/api/inventory?${params.toString()}`)
+      const response = await fetch(`/api/inventory?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error(`Erro ${response.status}: ${response.statusText}`)
+        throw new Error(`Erro ${response.status}: ${response.statusText}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!Array.isArray(data)) {
-        throw new Error("Dados inválidos recebidos do servidor")
+        throw new Error("Dados inválidos recebidos do servidor");
       }
 
-      setItems(data)
+      setItems(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Erro ao carregar inventário"
-      console.error("Error fetching items:", err)
-      setError(errorMessage)
-      setItems([])
+      const errorMessage =
+        err instanceof Error ? err.message : "Erro ao carregar inventário";
+      console.error("Error fetching items:", err);
+      setError(errorMessage);
+      setItems([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [searchQuery, categoryFilter, statusFilter])
+  }, [searchQuery, categoryFilter, statusFilter]);
 
   useEffect(() => {
-    fetchItems()
-  }, [fetchItems])
+    fetchItems();
+  }, [fetchItems]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Tem certeza que deseja remover este item?")) return
+    if (!confirm("Tem certeza que deseja remover este item?")) return;
 
-    setDeletingId(id)
+    setDeletingId(id);
 
     try {
       const response = await fetch(`/api/inventory/${id}`, {
         method: "DELETE",
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Falha ao remover item")
+        throw new Error("Falha ao remover item");
       }
 
       toast({
         title: "Sucesso",
         description: "Item removido com sucesso",
-      })
+      });
 
-      await fetchItems()
+      await fetchItems();
     } catch (err) {
-      console.error("Error deleting item:", err)
+      console.error("Error deleting item:", err);
       toast({
         title: "Erro",
         description: "Não foi possível remover o item",
         variant: "destructive",
-      })
+      });
     } finally {
-      setDeletingId(null)
+      setDeletingId(null);
     }
-  }
+  };
 
   const handleEdit = (item: InventoryItem) => {
-    setEditingItem(item)
-    setIsDialogOpen(true)
-  }
+    setEditingItem(item);
+    setIsDialogOpen(true);
+  };
 
   const handleDialogClose = () => {
-    setIsDialogOpen(false)
-    setEditingItem(null)
-    fetchItems()
-  }
+    setIsDialogOpen(false);
+    setEditingItem(null);
+    fetchItems();
+  };
 
   const handleMovement = (item: InventoryItem) => {
-    setMovementItem(item)
-    setIsMovementDialogOpen(true)
-  }
+    setMovementItem(item);
+    setIsMovementDialogOpen(true);
+  };
 
   const handleMovementClose = () => {
-    setIsMovementDialogOpen(false)
-    setMovementItem(null)
-    fetchItems()
-  }
+    setIsMovementDialogOpen(false);
+    setMovementItem(null);
+    fetchItems();
+  };
 
   const getStatus = (item: InventoryItem) => {
-    const ratio = item.quantity / item.min_stock
-    if (ratio <= 0.3) return "critical"
-    if (ratio <= 0.6) return "low"
-    if (ratio <= 1) return "medium"
-    return "good"
-  }
+    const ratio = item.quantity / item.min_stock;
+    if (ratio <= 0.3) return "critical";
+    if (ratio <= 0.6) return "low";
+    if (ratio <= 1) return "medium";
+    return "good";
+  };
 
   if (error) {
     return (
@@ -147,13 +165,17 @@ export function InventoryTable({
             <h3 className="font-semibold text-lg">Erro ao carregar dados</h3>
             <p className="text-sm text-muted-foreground mt-1">{error}</p>
           </div>
-          <Button onClick={fetchItems} variant="outline" className="gap-2 bg-transparent">
+          <Button
+            onClick={fetchItems}
+            variant="outline"
+            className="gap-2 bg-transparent"
+          >
             <RefreshCw className="h-4 w-4" />
             Tentar novamente
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   if (loading) {
@@ -178,7 +200,7 @@ export function InventoryTable({
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -187,35 +209,46 @@ export function InventoryTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[60px]"></TableHead>
+              <TableHead className="w-15"></TableHead>
               <TableHead>Item</TableHead>
               <TableHead>Categoria</TableHead>
               <TableHead>Quantidade</TableHead>
               <TableHead>Custo Unitário</TableHead>
               <TableHead>Fornecedor</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-12.5"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                  {searchQuery || categoryFilter !== "all" || statusFilter !== "all"
+                <TableCell
+                  colSpan={8}
+                  className="text-center py-8 text-muted-foreground"
+                >
+                  {searchQuery ||
+                  categoryFilter !== "all" ||
+                  statusFilter !== "all"
                     ? "Nenhum item encontrado com os filtros aplicados"
                     : "Nenhum item no inventário. Clique em 'Adicionar Item' para começar."}
                 </TableCell>
               </TableRow>
             ) : (
               items.map((item) => {
-                const status = getStatus(item)
-                const isDeleting = deletingId === item.id
+                const status = getStatus(item);
+                const isDeleting = deletingId === item.id;
 
                 return (
-                  <TableRow key={item.id} className={isDeleting ? "opacity-50" : ""}>
+                  <TableRow
+                    key={item.id}
+                    className={isDeleting ? "opacity-50" : ""}
+                  >
                     <TableCell>
                       <Avatar className="h-10 w-10 rounded-md">
-                        <AvatarImage src={item.image_url || undefined} className="object-cover" />
+                        <AvatarImage
+                          src={item.image_url || undefined}
+                          className="object-cover"
+                        />
                         <AvatarFallback className="rounded-md">
                           <Package className="h-5 w-5 text-muted-foreground" />
                         </AvatarFallback>
@@ -227,37 +260,45 @@ export function InventoryTable({
                       {item.quantity} {item.unit}
                     </TableCell>
                     <TableCell>R$ {item.cost_per_unit.toFixed(2)}</TableCell>
-                    <TableCell className="text-muted-foreground">{item.supplier || "N/A"}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {item.supplier || "N/A"}
+                    </TableCell>
                     <TableCell>
                       <Badge
                         variant={
                           status === "critical"
                             ? "destructive"
                             : status === "low"
-                              ? "default"
-                              : status === "medium"
-                                ? "secondary"
-                                : "outline"
+                            ? "default"
+                            : status === "medium"
+                            ? "secondary"
+                            : "outline"
                         }
                       >
                         {status === "critical"
                           ? "Crítico"
                           : status === "low"
-                            ? "Baixo"
-                            : status === "medium"
-                              ? "Médio"
-                              : "OK"}
+                          ? "Baixo"
+                          : status === "medium"
+                          ? "Médio"
+                          : "OK"}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" disabled={isDeleting}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={isDeleting}
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleMovement(item)}>
+                          <DropdownMenuItem
+                            onClick={() => handleMovement(item)}
+                          >
                             <ArrowUpDown className="h-4 w-4 mr-2" />
                             Movimentar Estoque
                           </DropdownMenuItem>
@@ -278,14 +319,19 @@ export function InventoryTable({
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )
+                );
               })
             )}
           </TableBody>
         </Table>
       </div>
 
-      <ItemDialog item={editingItem} open={isDialogOpen} onOpenChange={setIsDialogOpen} onSuccess={handleDialogClose} />
+      <ItemDialog
+        item={editingItem}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSuccess={handleDialogClose}
+      />
 
       <StockMovementDialog
         item={movementItem}
@@ -294,5 +340,5 @@ export function InventoryTable({
         onSuccess={handleMovementClose}
       />
     </>
-  )
+  );
 }
