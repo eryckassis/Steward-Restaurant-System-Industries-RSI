@@ -1,33 +1,50 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ImageCropUpload } from "@/components/image-crop-upload"
-import { useState, useEffect } from "react"
-import type { InventoryItem } from "@/lib/types"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ImageCropUpload } from "@/components/image-crop-upload";
+import { useState, useEffect } from "react";
+import type { InventoryItem } from "@/lib/types";
 import {
   validateInventoryItem,
   INVENTORY_CATEGORIES,
   INVENTORY_UNITS,
   formatCurrency,
   type ValidationError,
-} from "@/lib/validations"
-import { AlertCircle, CheckCircle2 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+} from "@/lib/validations";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ItemDialogProps {
-  item?: InventoryItem | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSuccess: () => void
+  item?: InventoryItem | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
 }
 
-export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogProps) {
+export function ItemDialog({
+  item,
+  open,
+  onOpenChange,
+  onSuccess,
+}: ItemDialogProps) {
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -37,11 +54,11 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
     cost_per_unit: "",
     supplier: "",
     image_url: "",
-  })
-  const [loading, setLoading] = useState(false)
-  const [errors, setErrors] = useState<ValidationError[]>([])
-  const [touched, setTouched] = useState<Record<string, boolean>>({})
-  const { toast } = useToast()
+  });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<ValidationError[]>([]);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const { toast } = useToast();
 
   useEffect(() => {
     if (item) {
@@ -54,7 +71,7 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
         cost_per_unit: item.cost_per_unit.toString(),
         supplier: item.supplier || "",
         image_url: item.image_url || "",
-      })
+      });
     } else {
       setFormData({
         name: "",
@@ -65,88 +82,86 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
         cost_per_unit: "",
         supplier: "",
         image_url: "",
-      })
+      });
     }
-    setErrors([])
-    setTouched({})
-  }, [item, open])
+    setErrors([]);
+    setTouched({});
+  }, [item, open]);
 
   const handleFieldChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
     // Clear error for this field when user starts typing
     if (touched[field]) {
-      const validation = validateInventoryItem({ ...formData, [field]: value })
-      setErrors(validation.errors)
+      const validation = validateInventoryItem({ ...formData, [field]: value });
+      setErrors(validation.errors);
     }
-  }
+  };
 
   const handleBlur = (field: string) => {
-    setTouched((prev) => ({ ...prev, [field]: true }))
-    const validation = validateInventoryItem(formData)
-    setErrors(validation.errors)
-  }
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const validation = validateInventoryItem(formData);
+    setErrors(validation.errors);
+  };
 
   const getFieldError = (field: string): string | undefined => {
-    if (!touched[field]) return undefined
-    return errors.find((e) => e.field === field)?.message
-  }
+    if (!touched[field]) return undefined;
+    return errors.find((e) => e.field === field)?.message;
+  };
 
   const hasFieldError = (field: string): boolean => {
-    return touched[field] && errors.some((e) => e.field === field)
-  }
+    return touched[field] && errors.some((e) => e.field === field);
+  };
 
   const handleImageUpload = async (blob: Blob) => {
     try {
-      const formData = new FormData()
-      formData.append("file", blob, "item-image.jpg")
+      const formData = new FormData();
+      formData.append("file", blob, "item-image.jpg");
 
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
-      })
+      });
 
-      if (!response.ok) throw new Error("Upload failed")
+      if (!response.ok) throw new Error("Upload failed");
 
-      const data = await response.json()
-      setFormData((prev) => ({ ...prev, image_url: data.url }))
+      const data = await response.json();
+      setFormData((prev) => ({ ...prev, image_url: data.url }));
     } catch (error) {
-      console.error("Error uploading image:", error)
-      throw error
+      console.error("Error uploading image:", error);
+      throw error;
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Mark all fields as touched
-    const allTouched = Object.keys(formData).reduce(
-      (acc, key) => {
-        acc[key] = true
-        return acc
-      },
-      {} as Record<string, boolean>,
-    )
-    setTouched(allTouched)
+    const allTouched = Object.keys(formData).reduce((acc, key) => {
+      acc[key] = true;
+      return acc;
+    }, {} as Record<string, boolean>);
+    setTouched(allTouched);
 
     // Validate all fields
-    const validation = validateInventoryItem(formData)
-    setErrors(validation.errors)
+    const validation = validateInventoryItem(formData);
+    setErrors(validation.errors);
 
     if (!validation.isValid) {
       toast({
         title: "Erro de Validação",
-        description: validation.errors[0]?.message || "Verifique os campos destacados",
+        description:
+          validation.errors[0]?.message || "Verifique os campos destacados",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const url = item ? `/api/inventory/${item.id}` : "/api/inventory"
-      const method = item ? "PUT" : "POST"
+      const url = item ? `/api/inventory/${item.id}` : "/api/inventory";
+      const method = item ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
@@ -161,45 +176,50 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
           supplier: formData.supplier.trim() || null,
           image_url: formData.image_url || null,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Erro ao salvar item")
+        const data = await response.json();
+        throw new Error(data.error || "Erro ao salvar item");
       }
 
       toast({
         title: "Sucesso",
-        description: item ? "Item atualizado com sucesso" : "Item adicionado com sucesso",
-      })
+        description: item
+          ? "Item atualizado com sucesso"
+          : "Item adicionado com sucesso",
+      });
 
-      onSuccess()
-      onOpenChange(false)
+      onSuccess();
+      onOpenChange(false);
     } catch (error) {
       toast({
         title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao salvar item",
+        description:
+          error instanceof Error ? error.message : "Erro ao salvar item",
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const totalCost = (() => {
-    const qty = Number.parseFloat(formData.quantity)
-    const cost = Number.parseFloat(formData.cost_per_unit)
-    if (isNaN(qty) || isNaN(cost)) return null
-    return qty * cost
-  })()
+    const qty = Number.parseFloat(formData.quantity);
+    const cost = Number.parseFloat(formData.cost_per_unit);
+    if (isNaN(qty) || isNaN(cost)) return null;
+    return qty * cost;
+  })();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-150 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{item ? "Editar Item" : "Adicionar Item"}</DialogTitle>
           <DialogDescription>
-            {item ? "Atualize as informações do item" : "Adicione um novo item ao inventário"}
+            {item
+              ? "Atualize as informações do item"
+              : "Adicione um novo item ao inventário"}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -240,18 +260,24 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
             <div className="space-y-2">
               <Label htmlFor="category" className="flex items-center gap-1">
                 Categoria *
-                {touched.category && !hasFieldError("category") && formData.category && (
-                  <CheckCircle2 className="h-3 w-3 text-green-500" />
-                )}
+                {touched.category &&
+                  !hasFieldError("category") &&
+                  formData.category && (
+                    <CheckCircle2 className="h-3 w-3 text-green-500" />
+                  )}
               </Label>
               <Select
                 value={formData.category}
                 onValueChange={(value) => {
-                  handleFieldChange("category", value)
-                  setTouched((prev) => ({ ...prev, category: true }))
+                  handleFieldChange("category", value);
+                  setTouched((prev) => ({ ...prev, category: true }));
                 }}
               >
-                <SelectTrigger className={hasFieldError("category") ? "border-destructive" : ""}>
+                <SelectTrigger
+                  className={
+                    hasFieldError("category") ? "border-destructive" : ""
+                  }
+                >
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
@@ -275,9 +301,11 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
             <div className="space-y-2">
               <Label htmlFor="quantity" className="flex items-center gap-1">
                 Quantidade *
-                {touched.quantity && !hasFieldError("quantity") && formData.quantity && (
-                  <CheckCircle2 className="h-3 w-3 text-green-500" />
-                )}
+                {touched.quantity &&
+                  !hasFieldError("quantity") &&
+                  formData.quantity && (
+                    <CheckCircle2 className="h-3 w-3 text-green-500" />
+                  )}
               </Label>
               <Input
                 id="quantity"
@@ -287,7 +315,9 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
                 value={formData.quantity}
                 onChange={(e) => handleFieldChange("quantity", e.target.value)}
                 onBlur={() => handleBlur("quantity")}
-                className={hasFieldError("quantity") ? "border-destructive" : ""}
+                className={
+                  hasFieldError("quantity") ? "border-destructive" : ""
+                }
                 placeholder="0.00"
               />
               {getFieldError("quantity") && (
@@ -308,35 +338,55 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
               <Select
                 value={formData.unit}
                 onValueChange={(value) => {
-                  handleFieldChange("unit", value)
-                  setTouched((prev) => ({ ...prev, unit: true }))
+                  handleFieldChange("unit", value);
+                  setTouched((prev) => ({ ...prev, unit: true }));
                 }}
               >
-                <SelectTrigger className={hasFieldError("unit") ? "border-destructive" : ""}>
+                <SelectTrigger
+                  className={hasFieldError("unit") ? "border-destructive" : ""}
+                >
                   <SelectValue placeholder="Selecione a unidade" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="kg" className="font-medium">
                     Peso
                   </SelectItem>
-                  {INVENTORY_UNITS.filter((u) => u.category === "peso").map((unit) => (
-                    <SelectItem key={unit.value} value={unit.value} className="pl-6">
-                      {unit.label}
-                    </SelectItem>
-                  ))}
+                  {INVENTORY_UNITS.filter((u) => u.category === "peso").map(
+                    (unit) => (
+                      <SelectItem
+                        key={unit.value}
+                        value={unit.value}
+                        className="pl-6"
+                      >
+                        {unit.label}
+                      </SelectItem>
+                    )
+                  )}
                   <SelectItem value="L" className="font-medium" disabled>
                     Volume
                   </SelectItem>
-                  {INVENTORY_UNITS.filter((u) => u.category === "volume").map((unit) => (
-                    <SelectItem key={unit.value} value={unit.value} className="pl-6">
-                      {unit.label}
-                    </SelectItem>
-                  ))}
+                  {INVENTORY_UNITS.filter((u) => u.category === "volume").map(
+                    (unit) => (
+                      <SelectItem
+                        key={unit.value}
+                        value={unit.value}
+                        className="pl-6"
+                      >
+                        {unit.label}
+                      </SelectItem>
+                    )
+                  )}
                   <SelectItem value="unid" className="font-medium" disabled>
                     Quantidade
                   </SelectItem>
-                  {INVENTORY_UNITS.filter((u) => u.category === "quantidade").map((unit) => (
-                    <SelectItem key={unit.value} value={unit.value} className="pl-6">
+                  {INVENTORY_UNITS.filter(
+                    (u) => u.category === "quantidade"
+                  ).map((unit) => (
+                    <SelectItem
+                      key={unit.value}
+                      value={unit.value}
+                      className="pl-6"
+                    >
                       {unit.label}
                     </SelectItem>
                   ))}
@@ -355,9 +405,11 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
             <div className="space-y-2">
               <Label htmlFor="min_stock" className="flex items-center gap-1">
                 Estoque Mínimo *
-                {touched.min_stock && !hasFieldError("min_stock") && formData.min_stock && (
-                  <CheckCircle2 className="h-3 w-3 text-green-500" />
-                )}
+                {touched.min_stock &&
+                  !hasFieldError("min_stock") &&
+                  formData.min_stock && (
+                    <CheckCircle2 className="h-3 w-3 text-green-500" />
+                  )}
               </Label>
               <Input
                 id="min_stock"
@@ -367,7 +419,9 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
                 value={formData.min_stock}
                 onChange={(e) => handleFieldChange("min_stock", e.target.value)}
                 onBlur={() => handleBlur("min_stock")}
-                className={hasFieldError("min_stock") ? "border-destructive" : ""}
+                className={
+                  hasFieldError("min_stock") ? "border-destructive" : ""
+                }
                 placeholder="0.00"
               />
               {getFieldError("min_stock") ? (
@@ -376,28 +430,41 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
                   {getFieldError("min_stock")}
                 </p>
               ) : (
-                <p className="text-xs text-muted-foreground">Alerta quando estoque atingir este valor</p>
+                <p className="text-xs text-muted-foreground">
+                  Alerta quando estoque atingir este valor
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cost_per_unit" className="flex items-center gap-1">
+              <Label
+                htmlFor="cost_per_unit"
+                className="flex items-center gap-1"
+              >
                 Custo Unitário (R$) *
-                {touched.cost_per_unit && !hasFieldError("cost_per_unit") && formData.cost_per_unit && (
-                  <CheckCircle2 className="h-3 w-3 text-green-500" />
-                )}
+                {touched.cost_per_unit &&
+                  !hasFieldError("cost_per_unit") &&
+                  formData.cost_per_unit && (
+                    <CheckCircle2 className="h-3 w-3 text-green-500" />
+                  )}
               </Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">R$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                  R$
+                </span>
                 <Input
                   id="cost_per_unit"
                   type="number"
                   step="0.01"
                   min="0.01"
                   value={formData.cost_per_unit}
-                  onChange={(e) => handleFieldChange("cost_per_unit", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("cost_per_unit", e.target.value)
+                  }
                   onBlur={() => handleBlur("cost_per_unit")}
-                  className={`pl-9 ${hasFieldError("cost_per_unit") ? "border-destructive" : ""}`}
+                  className={`pl-9 ${
+                    hasFieldError("cost_per_unit") ? "border-destructive" : ""
+                  }`}
                   placeholder="0.00"
                 />
               </div>
@@ -413,8 +480,12 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
           {totalCost !== null && totalCost > 0 && (
             <div className="p-3 bg-muted/50 rounded-lg border">
               <p className="text-sm">
-                <span className="text-muted-foreground">Valor total em estoque: </span>
-                <span className="font-semibold">{formatCurrency(totalCost)}</span>
+                <span className="text-muted-foreground">
+                  Valor total em estoque:{" "}
+                </span>
+                <span className="font-semibold">
+                  {formatCurrency(totalCost)}
+                </span>
               </p>
             </div>
           )}
@@ -438,7 +509,12 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={loading}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
@@ -448,5 +524,5 @@ export function ItemDialog({ item, open, onOpenChange, onSuccess }: ItemDialogPr
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
