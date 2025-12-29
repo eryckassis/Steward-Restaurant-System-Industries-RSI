@@ -65,7 +65,7 @@ export function WasteChart() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] flex items-center justify-center">
+          <div className="h-75 flex items-center justify-center">
             <div className="animate-pulse text-muted-foreground">
               Carregando...
             </div>
