@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Page } from "@react-pdf/renderer";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationProps {
@@ -52,4 +52,73 @@ function generatePageNumbers(current: number, total: number): PageItem[] {
     ellipsis("end"),
     total,
   ];
+}
+
+export function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) {
+  const pages = generatePageNumbers(currentPage, totalPages);
+
+  return (
+    <nav
+      className="flex items-center justify-between px-2"
+      aria-label="Paginação"
+    >
+      <p className="text-sm text-muted-foreground">
+        {" "}
+        Página {currentPage} de {totalPages}
+      </p>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="h-8 w-8"
+          aria-label="Página anterior"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+
+        {pages.map((item) => {
+          if (isEllipsis(item)) {
+            return (
+              <span
+                key={item.key}
+                className="px-2 text-muted-foreground"
+                aria-hidden
+              >
+                …
+              </span>
+            );
+          }
+          return (
+            <Button
+              key={item}
+              variant={currentPage === item ? "default" : "outline"}
+              size="icon"
+              onClick={() => onPageChange(item)}
+              className="h-8 w-8"
+              aria-label={`Página ${item}`}
+              aria-current={currentPage === item ? "page" : undefined}
+            >
+              {item}
+            </Button>
+          );
+        })}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="h-8 w-8"
+          aria-label="Próxima página"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </nav>
+  );
 }
