@@ -32,12 +32,15 @@ import type { InventoryItem } from "@/lib/types";
 import { ItemDialog } from "./item-dialog";
 import { StockMovementDialog } from "./stock-movement-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Pagination } from "./pagination";
 
 interface InventoryTableProps {
   searchQuery?: string;
   categoryFilter?: string;
   statusFilter?: string;
 }
+
+const ITEMS_PER_PAGE = 10;
 
 export function InventoryTable({
   searchQuery = "",
@@ -52,6 +55,7 @@ export function InventoryTable({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [movementItem, setMovementItem] = useState<InventoryItem | null>(null);
   const [isMovementDialogOpen, setIsMovementDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const { toast } = useToast();
 
   const fetchItems = useCallback(async () => {
@@ -156,6 +160,15 @@ export function InventoryTable({
     return "good";
   };
 
+  const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedItems = items.slice(startIndex, endIndex);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, categoryFilter, statusFilter]);
+
   if (error) {
     return (
       <div className="rounded-lg border bg-card p-8">
@@ -234,7 +247,7 @@ export function InventoryTable({
                 </TableCell>
               </TableRow>
             ) : (
-              items.map((item) => {
+              paginatedItems.map((item) => {
                 const status = getStatus(item);
                 const isDeleting = deletingId === item.id;
 
@@ -325,6 +338,16 @@ export function InventoryTable({
           </TableBody>
         </Table>
       </div>
+
+      {items.length > ITEMS_PER_PAGE && (
+        <div className="mt-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
 
       <ItemDialog
         item={editingItem}
