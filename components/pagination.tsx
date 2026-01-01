@@ -29,7 +29,7 @@ const range = (start: number, end: number): number[] =>
 const isEllipsis = (item: PageItem): item is Ellipsis =>
   typeof item === "object";
 
-// gerador de paginas
+//gerador de paginas
 
 function generatePageNumbers(current: number, total: number): PageItem[] {
   if (total <= MAX_VISIBLE) {
