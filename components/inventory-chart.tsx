@@ -142,7 +142,16 @@ export function InventoryChart() {
               name="Entradas"
               stroke="#10b981"
               strokeWidth={2}
-              dot={{ fill: "#10b981", r: 3 }}
+              dot={{ fill: isDark ? "#fff" : "#000" }}
+              activeDot={{ r: 6 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="saidas"
+              name="Saídas"
+              stroke="#f59e0b"
+              strokeWidth={2}
+              dot={{ fill: isDark ? "#fff" : "#000" }}
               activeDot={{ r: 6 }}
             />
           </LineChart>
