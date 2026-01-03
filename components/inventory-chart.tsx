@@ -154,6 +154,15 @@ export function InventoryChart() {
               dot={{ fill: isDark ? "#fff" : "#000" }}
               activeDot={{ r: 6 }}
             />
+            <Line
+              type="monotone"
+              dataKey="desperdicio"
+              name="Desperdicio"
+              stroke="#ef4444"
+              strokeWidth={2}
+              dot={{ fill: isDark ? "#fff" : "#000" }}
+              activeDot={{ r: 6 }}
+            />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>
