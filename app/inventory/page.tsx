@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { DashboardHeader } from "@/components/dashboard-header"
-import { InventoryTable } from "@/components/inventory-table"
-import { Button } from "@/components/ui/button"
-import { Plus, Search, Filter, X } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { ItemDialog } from "@/components/item-dialog"
-import { useState } from "react"
+import { DashboardHeader } from "@/components/dashboard-header";
+import { InventoryTable } from "@/components/inventory-table";
+import { Button } from "@/components/ui/button";
+import { Plus, Search, Filter, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ItemDialog } from "@/components/item-dialog";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,26 +14,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 export default function InventoryPage() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const handleDialogSuccess = () => {
     // Table will refetch automatically with current filters
-  }
+  };
 
   const clearFilters = () => {
-    setSearchQuery("")
-    setCategoryFilter("all")
-    setStatusFilter("all")
-  }
+    setSearchQuery("");
+    setCategoryFilter("all");
+    setStatusFilter("all");
+  };
 
-  const hasActiveFilters = searchQuery || categoryFilter !== "all" || statusFilter !== "all"
+  const hasActiveFilters =
+    searchQuery || categoryFilter !== "all" || statusFilter !== "all";
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,7 +43,9 @@ export default function InventoryPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Inventário</h1>
-            <p className="text-muted-foreground mt-1">Gerencie todos os ingredientes e produtos</p>
+            <p className="text-muted-foreground mt-1">
+              Gerencie todos os ingredientes e produtos
+            </p>
           </div>
           <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -136,7 +139,10 @@ export default function InventoryPage() {
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>Filtrar por status</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem checked={statusFilter === "all"} onCheckedChange={() => setStatusFilter("all")}>
+              <DropdownMenuCheckboxItem
+                checked={statusFilter === "all"}
+                onCheckedChange={() => setStatusFilter("all")}
+              >
                 Todos
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
@@ -145,7 +151,10 @@ export default function InventoryPage() {
               >
                 Crítico
               </DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem checked={statusFilter === "low"} onCheckedChange={() => setStatusFilter("low")}>
+              <DropdownMenuCheckboxItem
+                checked={statusFilter === "low"}
+                onCheckedChange={() => setStatusFilter("low")}
+              >
                 Baixo
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
@@ -171,10 +180,18 @@ export default function InventoryPage() {
           )}
         </div>
 
-        <InventoryTable searchQuery={searchQuery} categoryFilter={categoryFilter} statusFilter={statusFilter} />
+        <InventoryTable
+          searchQuery={searchQuery}
+          categoryFilter={categoryFilter}
+          statusFilter={statusFilter}
+        />
       </main>
 
-      <ItemDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onSuccess={handleDialogSuccess} />
+      <ItemDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSuccess={handleDialogSuccess}
+      />
     </div>
-  )
+  );
 }

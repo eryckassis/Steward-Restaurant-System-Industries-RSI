@@ -20,7 +20,10 @@ import { useEffect, useState } from "react";
 
 interface ChartData {
   month: string;
-  value: number;
+  total: number;
+  entradas: number;
+  saidas: number;
+  desperdicio: number;
 }
 
 export function InventoryChart() {
@@ -42,12 +45,12 @@ export function InventoryChart() {
         setError("Erro ao carregar dados");
         // Fallback data
         setData([
-          { month: "Jan", value: 0 },
-          { month: "Fev", value: 0 },
-          { month: "Mar", value: 0 },
-          { month: "Abr", value: 0 },
-          { month: "Mai", value: 0 },
-          { month: "Jun", value: 0 },
+          { month: "Jan", total: 0, entradas: 0, saidas: 0, desperdicio: 0 },
+          { month: "Fev", total: 0, entradas: 0, saidas: 0, desperdicio: 0 },
+          { month: "Mar", total: 0, entradas: 0, saidas: 0, desperdicio: 0 },
+          { month: "Abr", total: 0, entradas: 0, saidas: 0, desperdicio: 0 },
+          { month: "Mai", total: 0, entradas: 0, saidas: 0, desperdicio: 0 },
+          { month: "Jun", total: 0, entradas: 0, saidas: 0, desperdicio: 0 },
         ]);
       } finally {
         setLoading(false);
@@ -76,6 +79,27 @@ export function InventoryChart() {
     );
   }
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
+          <p className="font-semibold text-sm mb-2">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center gap-2 text-xs">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: entry.color }}
+              />
+              <span className="text-muted-foreground">{entry.name}:</span>
+              <span className="font-medium">{entry.value}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -102,19 +126,42 @@ export function InventoryChart() {
               tick={{ fill: isDark ? "#fff" : "hsl(var(--muted-foreground))" }}
               stroke={isDark ? "#fff" : "hsl(var(--muted-foreground))"}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "hsl(var(--popover))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "var(--radius)",
-              }}
+            <Tooltip content={<CustomTooltip />} />
+            <Line
+              type="monotone"
+              dataKey="total"
+              name="Total em estoque"
+              stroke="#2563eb"
+              strokeWidth={2}
+              dot={{ fill: isDark ? "#fff" : "#000" }}
+              activeDot={{ r: 6 }}
             />
             <Line
               type="monotone"
-              dataKey="value"
-              stroke="hsl(var(--primary))"
+              dataKey="entradas"
+              name="Entradas"
+              stroke="#10b981"
               strokeWidth={2}
               dot={{ fill: isDark ? "#fff" : "#000" }}
+              activeDot={{ r: 6 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="saidas"
+              name="Saídas"
+              stroke="#f59e0b"
+              strokeWidth={2}
+              dot={{ fill: isDark ? "#fff" : "#000" }}
+              activeDot={{ r: 6 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="desperdicio"
+              name="Desperdicio"
+              stroke="#ef4444"
+              strokeWidth={2}
+              dot={{ fill: isDark ? "#fff" : "#000" }}
+              activeDot={{ r: 6 }}
             />
           </LineChart>
         </ResponsiveContainer>
