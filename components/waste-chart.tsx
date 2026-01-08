@@ -75,13 +75,13 @@ export function WasteChart() {
     );
   }
 
-  const CustomToolTip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
           <p className="font-semibold text-sm mb-2">{label}</p>
           <div className="flex items-center gap-2 text-xs">
-            <div className="w-3 h-3 rounded-full bg-[hsl(var9--destructive)]" />
+            <div className="w-3 h-3 rounded-full bg-[hsl(var(--destructive))]" />
             <span className="text-muted-foreground">Desperdício:</span>
             <span className="font-medium">
               R$ {payload[0].value.toFixed(2)}
@@ -92,6 +92,10 @@ export function WasteChart() {
     }
     return null;
   };
+
+  const totalWaste = data.reduce((sum, item) => sum + item.value, 0);
+  const averageWaste = data.length > 0 ? totalWaste / data.length : 0;
+  const maxWaste = Math.max(...data.map((d) => d.value));
 
   return (
     <Card>
@@ -119,27 +123,46 @@ export function WasteChart() {
               tick={{ fill: isDark ? "#fff" : "#000" }}
               stroke={isDark ? "#fff" : "#000"}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "hsl(var(--popover))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: "var(--radius)",
-              }}
-              labelStyle={{ color: isDark ? "#fff" : "#000" }}
-              itemStyle={{ color: isDark ? "#fff" : "#000" }}
-              cursor={{
-                fill: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
-              }}
-              formatter={(value) => [`R$ ${value}`, "Desperdício"]}
-            />
+            <Tooltip content={<CustomTooltip />} />
             <Bar
               dataKey="value"
-              fill={isDark ? "#ef4444" : "#ef4444"}
+              fill="hsl(var(--destructive))"
               radius={[4, 4, 0, 0]}
-              activeBar={{ fill: isDark ? "#dc2626" : "#333" }}
             />
           </BarChart>
         </ResponsiveContainer>
+
+        <div className="mt-6 pt-4 border-t border-border">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="flex items-start gap-2">
+              <div className="w-3 h-3 rounded-full bg-[hsl(var(--destructive))] mt-1" />
+              <div className="text-xs">
+                <p className="font-medium">Total do Período</p>
+                <p className="text-muted-foreground">
+                  R$ {totalWaste.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-3 h-3 rounded-full bg-[hsl(var(--destructive))] mt-1 opacity-70" />
+              <div className="text-xs">
+                <p className="font-medium">Média Mensal</p>
+                <p className="text-muted-foreground">
+                  R$ {averageWaste.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-3 h-3 rounded-full bg-[hsl(var(--destructive))] mt-1 opacity-50" />
+              <div className="text-xs">
+                <p className="font-medium">Pico de Desperdício</p>
+                <p className="text-muted-foreground">
+                  R$ {maxWaste.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
