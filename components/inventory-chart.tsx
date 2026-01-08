@@ -165,6 +165,39 @@ export function InventoryChart() {
             />
           </LineChart>
         </ResponsiveContainer>
+
+        <div className="mt-6 pt-4 border-t border-border">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-[#2563eb]" />
+              <div className="text-xs">
+                <p className="font-medium">Total em Estoque</p>
+                <p className="text-muted-foreground">Linha contínua grossa</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-[#10b981]" />
+              <div className="text-xs">
+                <p className="font-medium">Entradas</p>
+                <p className="text-muted-foreground">Linha tracejada</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-[#f59e0b]" />
+              <div className="text-xs">
+                <p className="font-medium">Saídas</p>
+                <p className="text-muted-foreground">Linha tracejada</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-[#ef4444]" />
+              <div className="text-xs">
+                <p className="font-medium">Desperdício</p>
+                <p className="text-muted-foreground">Linha pontilhada</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
