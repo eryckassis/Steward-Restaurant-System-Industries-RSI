@@ -15,15 +15,25 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  Cell,
 } from "recharts";
 import { useEffect, useState } from "react";
 
 interface ChartData {
   month: string;
   value: number;
+  date: string;
 }
 
-export function WasteChart() {
+interface WasteChartProps {
+  safeThreshold?: number;
+  criticalThreshold?: number;
+}
+
+export function WasteChart({
+  safeThreshold = 100,
+  criticalThreshold = 300,
+}: WasteChartProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const [data, setData] = useState<ChartData[]>([]);
@@ -41,12 +51,12 @@ export function WasteChart() {
         console.error("Error fetching waste chart:", err);
         setError("Erro ao carregar dados");
         setData([
-          { month: "Jan", value: 0 },
-          { month: "Fev", value: 0 },
-          { month: "Mar", value: 0 },
-          { month: "Abr", value: 0 },
-          { month: "Mai", value: 0 },
-          { month: "Jun", value: 0 },
+          { month: "Jan", value: 0, date: "" },
+          { month: "Fev", value: 0, date: "" },
+          { month: "Mar", value: 0, date: "" },
+          { month: "Abr", value: 0, date: "" },
+          { month: "Mai", value: 0, date: "" },
+          { month: "Jun", value: 0, date: "" },
         ]);
       } finally {
         setLoading(false);
@@ -54,6 +64,16 @@ export function WasteChart() {
     };
     fetchData();
   }, []);
+
+  const getBarColor = (value: number) => {
+    if (value <= safeThreshold) {
+      return "hsl(142, 71%, 45%)"; // Green - Safe zone
+    } else if (value < criticalThreshold) {
+      return "hsl(48, 96%, 53%)"; // Yellow - Warning zone
+    } else {
+      return "hsl(0, 84.2%, 60.2%)"; // Red - Critical zone
+    }
+  };
 
   if (loading) {
     return (
@@ -77,15 +97,35 @@ export function WasteChart() {
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
+      const value = payload[0].value;
+      let zone = "Zona Segura";
+      let zoneColor = "hsl(142, 71%, 45%)";
+
+      if (value > safeThreshold && value < criticalThreshold) {
+        zone = "Zona de Alerta";
+        zoneColor = "hsl(48, 96%, 53%)";
+      } else if (value >= criticalThreshold) {
+        zone = "Zona Crítica";
+        zoneColor = "hsl(0, 84.2%, 60.2%)";
+      }
       return (
         <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
           <p className="font-semibold text-sm mb-2">{label}</p>
-          <div className="flex items-center gap-2 text-xs">
-            <div className="w-3 h-3 rounded-full bg-[hsl(var(--destructive))]" />
-            <span className="text-muted-foreground">Desperdício:</span>
-            <span className="font-medium">
-              R$ {payload[0].value.toFixed(2)}
-            </span>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: zoneColor }}
+              />
+              <span className="text-muted-foreground">Desperdício:</span>
+              <span className="font-medium">R$ {value.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-muted-foreground">Status:</span>
+              <span className="font-medium" style={{ color: zoneColor }}>
+                {zone}
+              </span>
+            </div>
           </div>
         </div>
       );
@@ -124,16 +164,16 @@ export function WasteChart() {
               stroke={isDark ? "#fff" : "#000"}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Bar
-              dataKey="value"
-              fill="hsl(var(--destructive))"
-              radius={[4, 4, 0, 0]}
-            />
+            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={getBarColor(entry.value)} />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
 
         <div className="mt-6 pt-4 border-t border-border">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="flex items-start gap-2">
               <div className="w-3 h-3 rounded-full bg-[hsl(var(--destructive))] mt-1" />
               <div className="text-xs">
@@ -159,6 +199,31 @@ export function WasteChart() {
                 <p className="text-muted-foreground">
                   R$ {maxWaste.toFixed(2)}
                 </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-border">
+            <p className="text-xs font-medium mb-2">Zonas de Tolerância</p>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-3 h-3 rounded-full bg-[hsl(142,71%,45%)]" />
+                <span className="text-muted-foreground">
+                  Segura: R$ {safeThreshold.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-3 h-3 rounded-full bg-[hsl(48,96%,53%)]" />
+                <span className="text-muted-foreground">
+                  Alerta: R$ {safeThreshold.toFixed(2)} -{" "}
+                  {criticalThreshold.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-3 h-3 rounded-full bg-destructive" />
+                <span className="text-muted-foreground">
+                  Crítica: R$ {criticalThreshold.toFixed(2)}
+                </span>
               </div>
             </div>
           </div>
