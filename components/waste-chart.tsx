@@ -67,11 +67,11 @@ export function WasteChart({
 
   const getBarColor = (value: number) => {
     if (value <= safeThreshold) {
-      return "hsl(142, 71%, 45%)"; // Green - Safe zone
+      return "hsl(142, 71%, 45%)"; // Verde - Safe zone
     } else if (value < criticalThreshold) {
-      return "hsl(48, 96%, 53%)"; // Yellow - Warning zone
+      return "hsl(48, 96%, 53%)"; // Amarelow - Warning zone
     } else {
-      return "hsl(0, 84.2%, 60.2%)"; // Red - Critical zone
+      return "hsl(0, 84.2%, 60.2%)"; // Vermelho  - Critical zone
     }
   };
 

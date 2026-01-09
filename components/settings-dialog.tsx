@@ -13,18 +13,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarIcon } from "lucide-react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Calendar, Download, GraduationCap, AlertTriangle } from "lucide-react";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Download, GraduationCap, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { pdf } from "@react-pdf/renderer";
 import { PDFReport } from "@/components/pdf-report";
+import { format, addMonths, isBefore, startOfDay } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import type { UserSettings, ReportData } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -43,6 +46,8 @@ export function SettingsDialog({
   const [safeThreshold, setSafeThreshold] = useState<string>("100");
   const [criticalThreshold, setCriticalThreshold] = useState<string>("300");
   const [thresholdError, setThresholdError] = useState<string>("");
+  const [reportDate, setReportDate] = useState<Date | undefined>(undefined);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -54,6 +59,9 @@ export function SettingsDialog({
     if (settings) {
       setSafeThreshold(String(settings.waste_safe_threshold || 100));
       setCriticalThreshold(String(settings.waste_critical_threshold || 300));
+      if (settings.next_report_date) {
+        setReportDate(new Date(settings.next_report_date));
+      }
     }
   }, [settings]);
 
@@ -149,18 +157,22 @@ export function SettingsDialog({
     }
   };
 
-  const getNextReportDate = () => {
-    if (!settings) return new Date();
-    const today = new Date();
-    const nextDate = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      settings.pdf_report_day
-    );
-    if (nextDate <= today) {
-      nextDate.setMonth(nextDate.getMonth() + 1);
+  const handleReportDateChange = (date: Date | undefined) => {
+    if (!date) return;
+    const today = startOfDay(new Date());
+    const selectedDate = startOfDay(date);
+
+    let nextDate = selectedDate;
+    if (
+      isBefore(selectedDate, today) ||
+      selectedDate.getTime() === today.getTime()
+    ) {
+      nextDate = addMonths(selectedDate, 1);
     }
-    return nextDate;
+
+    setReportDate(nextDate);
+    setIsCalendarOpen(false);
+    updateSettings({ next_report_date: format(nextDate, "yyy-MM-dd") });
   };
 
   if (!settings) return null;
@@ -171,7 +183,7 @@ export function SettingsDialog({
         <DialogHeader>
           <DialogTitle>Configurações do Sistema</DialogTitle>
           <DialogDescription>
-            Personalize sua experiência no RestaurantOS
+            Personalize sua experiência no Steward RSI
           </DialogDescription>
         </DialogHeader>
 
@@ -186,40 +198,67 @@ export function SettingsDialog({
           <TabsContent value="reports" className="space-y-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="report-day">Dia do Mês para Relatório</Label>
-                <Select
-                  value={String(settings.pdf_report_day)}
-                  onValueChange={(value) =>
-                    updateSettings({ pdf_report_day: Number.parseInt(value) })
-                  }
-                  disabled={loading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o dia" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
-                      <SelectItem key={day} value={String(day)}>
-                        Dia {day}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Data do próximo relatório</Label>
+                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !reportDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {reportDate
+                        ? format(reportDate, "PPP", { locale: ptBR })
+                        : "Selecionar uma data"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={reportDate}
+                      onSelect={handleReportDateChange}
+                      disabled={(date) =>
+                        isBefore(startOfDay(date), startOfDay(new Date()))
+                      }
+                      autoFocus
+                    />
+                  </PopoverContent>
+                </Popover>
                 <p className="text-sm text-muted-foreground">
-                  Define qual dia do mês o relatório ficará disponível para
-                  download
+                  Escolha quando o próximo relatório ficará disponível. O
+                  sistema projetará automaticamente as próximas ocorrências
+                  mensais.
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label>Próximo Relatório Disponível</Label>
-                <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
-                  <Calendar className="h-4 w-4" />
-                  <span className="text-sm">
-                    {getNextReportDate().toLocaleDateString("pt-BR")}
-                  </span>
+              {reportDate && (
+                <div className="space-y-2">
+                  <Label>Próximas Ocorrências</Label>
+                  <div className="space-y-2">
+                    {[0, 1, 2].map((monthOffset) => {
+                      const futureDate = addMonths(reportDate, monthOffset);
+                      return (
+                        <div
+                          key={monthOffset}
+                          className="flex items-center gap-2 p-2 border rounded-lg bg-muted/50"
+                        >
+                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">
+                            {format(futureDate, "PPP", { locale: ptBR })}
+                          </span>
+                          {monthOffset === 0 && (
+                            <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                              Próximo
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <Button
                 onClick={generateAndDownloadPDF}
@@ -316,9 +355,9 @@ export function SettingsDialog({
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
-                    <div className="w-4 h-4 rounded bg-[hsl(var(--destructive))]" />
+                    <div className="w-4 h-4 rounded bg-[hsl(0,84.2%,60.2%)]" />
                     <span className="text-muted-foreground">
-                      Zona Crítica: ≥ R${" "}
+                      Zona Crítica: R${" "}
                       {Number.parseFloat(criticalThreshold || "0").toFixed(2)}
                     </span>
                   </div>
