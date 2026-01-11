@@ -28,6 +28,7 @@ import { ptBR } from "date-fns/locale";
 import type { UserSettings, ReportData } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
+import { UseSettings } from "@/lib/hooks/use-settings";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -40,7 +41,7 @@ export function SettingsDialog({
   onOpenChange,
   onStartTour,
 }: SettingsDialogProps) {
-  const [settings, setSettings] = useState<UserSettings | null>(null);
+  const { settings, isLoading, updateSettings: mutateSettings } = UseSettings();
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [safeThreshold, setSafeThreshold] = useState<string>("100");
@@ -48,12 +49,6 @@ export function SettingsDialog({
   const [thresholdError, setThresholdError] = useState<string>("");
   const [reportDate, setReportDate] = useState<Date | undefined>(undefined);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      fetchSettings();
-    }
-  }, [open]);
 
   useEffect(() => {
     if (settings) {
@@ -65,34 +60,16 @@ export function SettingsDialog({
     }
   }, [settings]);
 
-  const fetchSettings = async () => {
-    try {
-      const response = await fetch("/api/settings");
-      if (!response.ok) throw new Error("Failed to fetch settings");
-      const data = await response.json();
-      setSettings(data);
-    } catch (error) {
-      toast.error("Erro ao carregar configurações");
-    }
-  };
-
-  const updateSettings = async (updates: Partial<UserSettings>) => {
+  const updateSettings = async (updates: any) => {
     setLoading(true);
     try {
-      const response = await fetch("/api/settings", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
-      });
+      const result = await mutateSettings(updates);
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to update settings");
+      if (!result.success) {
+        throw new Error(result.error);
       }
 
-      const updated = await response.json();
-      setSettings(updated);
-      toast.success("Configurações atualizadas!");
+      toast.success("Configurações atualizdas!");
 
       if (updates.high_contrast_mode !== undefined) {
         document.documentElement.classList.toggle(
@@ -132,7 +109,6 @@ export function SettingsDialog({
       waste_critical_threshold: critical,
     });
   };
-
   const generateAndDownloadPDF = async () => {
     setGenerating(true);
     try {
