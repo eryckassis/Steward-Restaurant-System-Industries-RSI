@@ -42,10 +42,8 @@ export function DashboardHeader() {
   const [isSettingsHovered, setIsSettingsHovered] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    refreshProfiles();
     checkAndStartTour();
-  }, [refreshProfiles]);
+  }, []);
 
   const checkAndStartTour = async () => {
     try {
