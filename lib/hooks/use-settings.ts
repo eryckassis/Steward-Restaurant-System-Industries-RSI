@@ -3,7 +3,7 @@ import type { UserSettings } from "@/lib/types";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export function UseSettings() {
+export function useSettings() {
   const { data, error, isLoading, mutate } = useSWR<UserSettings>(
     "/api/settings",
     fetcher,

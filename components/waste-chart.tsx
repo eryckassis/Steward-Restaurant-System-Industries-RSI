@@ -18,6 +18,7 @@ import {
   Cell,
 } from "recharts";
 import { useEffect, useState } from "react";
+import { useSettings } from "@/lib/hooks/use-settings";
 
 interface ChartData {
   month: string;
@@ -25,20 +26,15 @@ interface ChartData {
   date: string;
 }
 
-interface WasteChartProps {
-  safeThreshold?: number;
-  criticalThreshold?: number;
-}
-
-export function WasteChart({
-  safeThreshold = 100,
-  criticalThreshold = 300,
-}: WasteChartProps) {
+export function WasteChart() {
+  const { settings } = useSettings();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const safeThreshold = settings?.waste_critical_threshold || 100;
+  const criticalThreshold = settings?.waste_critical_threshold || 300;
 
   useEffect(() => {
     const fetchData = async () => {

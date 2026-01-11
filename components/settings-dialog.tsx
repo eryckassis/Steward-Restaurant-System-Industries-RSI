@@ -25,10 +25,10 @@ import { pdf } from "@react-pdf/renderer";
 import { PDFReport } from "@/components/pdf-report";
 import { format, addMonths, isBefore, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { UserSettings, ReportData } from "@/lib/types";
+import type { ReportData } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
-import { UseSettings } from "@/lib/hooks/use-settings";
+import { useSettings } from "@/lib/hooks/use-settings";
 
 interface SettingsDialogProps {
   open: boolean;
@@ -41,7 +41,7 @@ export function SettingsDialog({
   onOpenChange,
   onStartTour,
 }: SettingsDialogProps) {
-  const { settings, isLoading, updateSettings: mutateSettings } = UseSettings();
+  const { settings, isLoading, updateSettings: mutateSettings } = useSettings();
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [safeThreshold, setSafeThreshold] = useState<string>("100");
