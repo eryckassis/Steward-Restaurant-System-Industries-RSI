@@ -159,7 +159,7 @@ export function SettingsDialog({
         <DialogHeader>
           <DialogTitle>Configurações do Sistema</DialogTitle>
           <DialogDescription>
-            Personalize sua experiência no Steward RSI
+            Personalize sua experiência no RestaurantOS
           </DialogDescription>
         </DialogHeader>
 
@@ -174,7 +174,7 @@ export function SettingsDialog({
           <TabsContent value="reports" className="space-y-4">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Data do próximo relatório</Label>
+                <Label>Data do Próximo Relatório</Label>
                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <PopoverTrigger asChild>
                     <Button
@@ -187,7 +187,7 @@ export function SettingsDialog({
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {reportDate
                         ? format(reportDate, "PPP", { locale: ptBR })
-                        : "Selecionar uma data"}
+                        : "Selecione uma data"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -198,7 +198,7 @@ export function SettingsDialog({
                       disabled={(date) =>
                         isBefore(startOfDay(date), startOfDay(new Date()))
                       }
-                      autoFocus
+                      initialFocus
                     />
                   </PopoverContent>
                 </Popover>
@@ -360,7 +360,7 @@ export function SettingsDialog({
               </div>
               <Switch
                 id="high-contrast"
-                checked={settings.high_contrast_mode}
+                checked={settings?.high_contrast_mode}
                 onCheckedChange={(checked) =>
                   updateSettings({ high_contrast_mode: checked })
                 }
@@ -399,7 +399,7 @@ export function SettingsDialog({
                 </div>
                 <Switch
                   id="guided-mode"
-                  checked={settings.guided_mode}
+                  checked={settings?.guided_mode}
                   onCheckedChange={(checked) =>
                     updateSettings({ guided_mode: checked })
                   }
