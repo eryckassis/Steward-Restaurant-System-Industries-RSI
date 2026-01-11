@@ -1,4 +1,3 @@
-import { ReportData } from "./../../../lib/types";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-helpers";
@@ -22,7 +21,6 @@ export async function GET() {
 
     if (error) throw error;
 
-    // If no settings exist, create default ones with correct schema columns
     if (!settings) {
       const nextMonth = new Date();
       nextMonth.setMonth(nextMonth.getMonth() + 1);
