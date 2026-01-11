@@ -18,6 +18,7 @@ import {
   Cell,
 } from "recharts";
 import { useEffect, useState } from "react";
+import { useSettings } from "@/lib/hooks/use-settings";
 
 interface ChartData {
   month: string;
@@ -25,20 +26,15 @@ interface ChartData {
   date: string;
 }
 
-interface WasteChartProps {
-  safeThreshold?: number;
-  criticalThreshold?: number;
-}
-
-export function WasteChart({
-  safeThreshold = 100,
-  criticalThreshold = 300,
-}: WasteChartProps) {
+export function WasteChart() {
+  const { settings } = useSettings();
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const safeThreshold = settings?.waste_critical_threshold || 100;
+  const criticalThreshold = settings?.waste_critical_threshold || 300;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,11 +63,11 @@ export function WasteChart({
 
   const getBarColor = (value: number) => {
     if (value <= safeThreshold) {
-      return "hsl(142, 71%, 45%)"; // Green - Safe zone
+      return "hsl(142, 71%, 45%)"; // Verde - Safe zone
     } else if (value < criticalThreshold) {
-      return "hsl(48, 96%, 53%)"; // Yellow - Warning zone
+      return "hsl(48, 96%, 53%)"; // Amarelow - Warning zone
     } else {
-      return "hsl(0, 84.2%, 60.2%)"; // Red - Critical zone
+      return "hsl(0, 84.2%, 60.2%)"; // Vermelho  - Critical zone
     }
   };
 

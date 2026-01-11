@@ -83,7 +83,7 @@ export interface Notification {
 export interface UserSettings {
   id: string;
   user_id: string;
-  pdf_report_day: number;
+  next_report_date: string;
   high_contrast_mode: boolean;
   guided_mode: boolean;
   two_factor_enabled: boolean;

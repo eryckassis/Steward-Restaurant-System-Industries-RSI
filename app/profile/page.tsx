@@ -1,53 +1,43 @@
-"use client"
+"use client";
 
-import { DashboardHeader } from "@/components/dashboard-header"
-import { ProfileForm } from "@/components/profile-form"
-import { UserProfileSection } from "@/components/user-profile-section"
-import { SecuritySettings } from "@/components/security-settings"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Building2, Mail, Phone, MapPin, User, Shield } from "lucide-react"
-import { useState, useEffect } from "react"
-import type { RestaurantProfile } from "@/lib/types"
-import { useToast } from "@/hooks/use-toast"
-import { useProfile } from "@/lib/contexts/profile-context"
-import { ImageCropUpload } from "@/components/image-crop-upload"
+import { DashboardHeader } from "@/components/dashboard-header";
+import { ProfileForm } from "@/components/profile-form";
+import { UserProfileSection } from "@/components/user-profile-section";
+import { SecuritySettings } from "@/components/security-settings";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Building2, Mail, Phone, MapPin, User, Shield } from "lucide-react";
+import type { RestaurantProfile } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/lib/contexts/profile-context";
+import { ImageCropUpload } from "@/components/image-crop-upload";
 
 export default function ProfilePage() {
-  const {
-    restaurantProfile,
-    userProfile,
-    setRestaurantProfile,
-    setUserProfile,
-    refreshProfiles,
-    isLoading: contextLoading,
-  } = useProfile()
+  const { restaurantProfile, userProfile, refreshProfiles, isLoading } =
+    useProfile();
 
-  const [initialLoading, setInitialLoading] = useState(true)
-  const { toast } = useToast()
-
-  useEffect(() => {
-    const loadData = async () => {
-      await refreshProfiles()
-      setInitialLoading(false)
-    }
-    loadData()
-  }, [refreshProfiles])
+  const { toast } = useToast();
 
   const handleLogoUpload = async (blob: Blob) => {
     try {
-      const formData = new FormData()
-      formData.append("file", blob, "restaurant-logo.jpg")
+      const formData = new FormData();
+      formData.append("file", blob, "restaurant-logo.jpg");
 
       const uploadResponse = await fetch("/api/upload", {
         method: "POST",
         body: formData,
-      })
+      });
 
-      if (!uploadResponse.ok) throw new Error("Failed to upload file")
+      if (!uploadResponse.ok) throw new Error("Failed to upload file");
 
-      const uploadData = await uploadResponse.json()
+      const uploadData = await uploadResponse.json();
 
       const profileResponse = await fetch("/api/profile", {
         method: "PUT",
@@ -58,28 +48,31 @@ export default function ProfilePage() {
           ...restaurantProfile,
           logo_url: uploadData.url,
         }),
-      })
+      });
 
-      if (!profileResponse.ok) throw new Error("Failed to update profile")
+      if (!profileResponse.ok) throw new Error("Failed to update profile");
 
-      const updatedProfile = await profileResponse.json()
-      setRestaurantProfile(updatedProfile)
+      await refreshProfiles();
 
       toast({
         title: "Sucesso",
         description: "Logo do restaurante atualizada com sucesso",
-      })
+      });
     } catch (error) {
-      console.error("Error uploading logo:", error)
-      throw error
+      console.error("Error uploading logo:", error);
+      throw error;
     }
-  }
+  };
 
-  const handleProfileUpdate = (updatedProfile: RestaurantProfile) => {
-    setRestaurantProfile(updatedProfile)
-  }
+  const handleProfileUpdate = async () => {
+    await refreshProfiles();
+  };
 
-  if (initialLoading || !restaurantProfile || !userProfile) {
+  const handleUserUpdate = async () => {
+    await refreshProfiles();
+  };
+
+  if (isLoading || !restaurantProfile || !userProfile) {
     return (
       <div className="min-h-screen bg-background">
         <DashboardHeader />
@@ -93,7 +86,7 @@ export default function ProfilePage() {
           </div>
         </main>
       </div>
-    )
+    );
   }
 
   const restaurantInitials = restaurantProfile.name
@@ -101,7 +94,7 @@ export default function ProfilePage() {
     .map((n) => n[0])
     .join("")
     .toUpperCase()
-    .slice(0, 2)
+    .slice(0, 2);
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,7 +102,9 @@ export default function ProfilePage() {
       <main className="container mx-auto p-6 space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Perfil</h1>
-          <p className="text-muted-foreground mt-1">Gerencie as informações do seu restaurante e usuário</p>
+          <p className="text-muted-foreground mt-1">
+            Gerencie as informações do seu restaurante e usuário
+          </p>
         </div>
 
         <Tabs defaultValue="user" className="space-y-6">
@@ -129,11 +124,14 @@ export default function ProfilePage() {
           </TabsList>
 
           <TabsContent value="user" className="space-y-6">
-            <UserProfileSection initialUser={userProfile} onUpdate={setUserProfile} />
+            <UserProfileSection
+              initialUser={userProfile}
+              onUpdate={handleUserUpdate}
+            />
           </TabsContent>
 
           <TabsContent value="security" className="space-y-6">
-            <SecuritySettings user={userProfile} onUpdate={setUserProfile} />
+            <SecuritySettings user={userProfile} onUpdate={handleUserUpdate} />
           </TabsContent>
 
           <TabsContent value="restaurant" className="space-y-6">
@@ -141,16 +139,24 @@ export default function ProfilePage() {
               <Card className="lg:col-span-1">
                 <CardHeader>
                   <CardTitle>Informações do Restaurante</CardTitle>
-                  <CardDescription>Logo e detalhes do estabelecimento</CardDescription>
+                  <CardDescription>
+                    Logo e detalhes do estabelecimento
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex flex-col items-center space-y-4">
                     <Avatar className="h-24 w-24">
-                      <AvatarImage src={restaurantProfile.logo_url || undefined} />
-                      <AvatarFallback className="text-2xl">{restaurantInitials}</AvatarFallback>
+                      <AvatarImage
+                        src={restaurantProfile.logo_url || undefined}
+                      />
+                      <AvatarFallback className="text-2xl">
+                        {restaurantInitials}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="text-center">
-                      <h3 className="font-semibold text-lg">{restaurantProfile.name}</h3>
+                      <h3 className="font-semibold text-lg">
+                        {restaurantProfile.name}
+                      </h3>
                     </div>
 
                     <div className="w-full">
@@ -189,10 +195,15 @@ export default function ProfilePage() {
               <Card className="lg:col-span-2">
                 <CardHeader>
                   <CardTitle>Editar Perfil do Restaurante</CardTitle>
-                  <CardDescription>Atualize as informações do seu restaurante</CardDescription>
+                  <CardDescription>
+                    Atualize as informações do seu restaurante
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ProfileForm profile={restaurantProfile} onUpdate={handleProfileUpdate} />
+                  <ProfileForm
+                    profile={restaurantProfile}
+                    onUpdate={handleProfileUpdate}
+                  />
                 </CardContent>
               </Card>
             </div>
@@ -200,5 +211,5 @@ export default function ProfilePage() {
         </Tabs>
       </main>
     </div>
-  )
+  );
 }

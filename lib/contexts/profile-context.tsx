@@ -1,65 +1,66 @@
-"use client"
+"use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
-import type { RestaurantProfile, UserProfile } from "@/lib/types"
+import { createContext, useContext, type ReactNode } from "react";
+import useSWR from "swr";
+import type { RestaurantProfile, UserProfile } from "@/lib/types";
 
 interface ProfileContextType {
-  restaurantProfile: RestaurantProfile | null
-  userProfile: UserProfile | null
-  setRestaurantProfile: (profile: RestaurantProfile | null) => void
-  setUserProfile: (profile: UserProfile | null) => void
-  refreshProfiles: () => Promise<void>
-  isLoading: boolean
+  restaurantProfile: RestaurantProfile | null;
+  userProfile: UserProfile | null;
+  refreshProfiles: () => Promise<void>;
+  isLoading: boolean;
 }
 
-const ProfileContext = createContext<ProfileContextType | undefined>(undefined)
+const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
+
+const fetcher = (url: string) =>
+  fetch(url).then((res) => (res.ok ? res.json() : null));
 
 export function ProfileProvider({ children }: { children: ReactNode }) {
-  const [restaurantProfile, setRestaurantProfile] = useState<RestaurantProfile | null>(null)
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const {
+    data: restaurantProfile,
+    isLoading: isLoadingRestaurant,
+    mutate: mutateRestaurant,
+  } = useSWR<RestaurantProfile | null>("/api/profile", fetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 60000,
+  });
 
-  const refreshProfiles = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const [profileRes, userRes] = await Promise.all([fetch("/api/profile"), fetch("/api/user")])
+  const {
+    data: userProfile,
+    isLoading: isLoadingUser,
+    mutate: mutateUser,
+  } = useSWR<UserProfile | null>("/api/user", fetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 60000,
+  });
 
-      if (profileRes.ok) {
-        const profileData = await profileRes.json()
-        setRestaurantProfile(profileData)
-      }
+  const refreshProfiles = async () => {
+    await Promise.all([mutateRestaurant(), mutateUser()]);
+  };
 
-      if (userRes.ok) {
-        const userData = await userRes.json()
-        setUserProfile(userData)
-      }
-    } catch (error) {
-      console.error("Error refreshing profiles:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+  const isLoading = isLoadingRestaurant || isLoadingUser;
 
   return (
     <ProfileContext.Provider
       value={{
-        restaurantProfile,
-        userProfile,
-        setRestaurantProfile,
-        setUserProfile,
+        restaurantProfile: restaurantProfile ?? null,
+        userProfile: userProfile ?? null,
         refreshProfiles,
         isLoading,
       }}
     >
       {children}
     </ProfileContext.Provider>
-  )
+  );
 }
 
 export function useProfile() {
-  const context = useContext(ProfileContext)
+  const context = useContext(ProfileContext);
   if (context === undefined) {
-    throw new Error("useProfile must be used within a ProfileProvider")
+    throw new Error("useProfile must be used within a ProfileProvider");
   }
-  return context
+  return context;
 }

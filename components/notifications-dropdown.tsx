@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import useSWR, { mutate } from "swr";
 import {
   Check,
   Trash2,
@@ -26,36 +27,25 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BellRing } from "./animate-ui/icons/bell-ring";
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export function NotificationsDropdown() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const fetchNotifications = useCallback(async () => {
-    try {
-      const response = await fetch("/api/notifications?limit=20");
-      if (response.ok) {
-        const data = await response.json();
-        setNotifications(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      setNotifications([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchNotifications();
-    // Poll a cada 30 segundos
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
+  const {
+    data: notifications = [],
+    isLoading,
+    mutate: revalidateNotifications,
+  } = useSWR<Notification[]>("/api/notifications?limit=20", fetcher, {
+    revalidateOnFocus: true,
+    refreshInterval: isOpen ? 60000 : 0,
+    keepPreviousData: true,
+    fallbackData: [],
+    revalidateOnMount: true,
+  });
 
   const unreadCount = notifications.filter((n) => !n.read).length;
-
   const markAsRead = async (id: string) => {
     try {
       await fetch("/api/notifications", {
@@ -63,11 +53,15 @@ export function NotificationsDropdown() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, read: true }),
       });
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+
+      mutate(
+        "/api/notifications?limit=20",
+        (current: Notification[] = []) =>
+          current.map((n) => (n.id === id ? { ...n, read: true } : n)),
+        { revalidate: false }
       );
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      console.error("Error marking notifications as read:", error);
     }
   };
 
@@ -78,7 +72,13 @@ export function NotificationsDropdown() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: "all", read: true }),
       });
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+
+      mutate(
+        "/api/notifications?limit=20",
+        (current: Notification[] = []) =>
+          current.map((n) => ({ ...n, read: true })),
+        { revalidate: false }
+      );
     } catch (error) {
       console.error("Error marking all as read:", error);
     }
@@ -87,7 +87,14 @@ export function NotificationsDropdown() {
   const deleteNotification = async (id: string) => {
     try {
       await fetch(`/api/notifications?id=${id}`, { method: "DELETE" });
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
+
+      mutate(
+        `/api/notifications?id=${id}`,
+        (current: Notification[] = []) => current.filter((n) => n.id !== id),
+        {
+          revalidate: false,
+        }
+      );
     } catch (error) {
       console.error("Error deleting notification:", error);
     }
@@ -139,7 +146,7 @@ export function NotificationsDropdown() {
               className="h-6 px-2 text-xs"
               onClick={(e) => {
                 e.preventDefault();
-                fetchNotifications();
+                revalidateNotifications();
               }}
             >
               <RefreshCw className="h-3 w-3" />
@@ -162,7 +169,7 @@ export function NotificationsDropdown() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <ScrollArea className="h-75">
-          {loading ? (
+          {isLoading ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
               Carregando...
             </div>
