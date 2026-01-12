@@ -102,8 +102,8 @@ export function DashboardHeader() {
                 <Image
                   src="/LogoPrimario.svg"
                   alt="Logo STEWARD RSI"
-                  width={60}
-                  height={60}
+                  width={70}
+                  height={70}
                   className={`rounded-lg ${isDark ? "invert" : ""}`}
                 />
               )}
