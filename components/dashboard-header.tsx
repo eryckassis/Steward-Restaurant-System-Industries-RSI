@@ -42,6 +42,7 @@ export function DashboardHeader() {
   const [isSettingsHovered, setIsSettingsHovered] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     checkAndStartTour();
   }, []);
 
