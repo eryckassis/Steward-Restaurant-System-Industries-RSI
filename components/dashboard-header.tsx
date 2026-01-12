@@ -31,11 +31,11 @@ const navigation = [
 ];
 
 export function DashboardHeader() {
-  const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { userProfile, refreshProfiles, isLoading } = useProfile();
+  const { resolvedTheme } = useTheme();
+  const { userProfile, isLoading } = useProfile();
+  const [mounted, setMounted] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [runTour, setRunTour] = useState(false);
   const [isProfileHovered, setIsProfileHovered] = useState(false);
