@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserRound } from "./animate-ui/icons/user-round";
-import { LayoutDashboard, Package, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, LogOut, Bot } from "lucide-react";
 import { Settings } from "./animate-ui/icons/settings";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
@@ -24,10 +24,12 @@ import { useEffect, useState } from "react";
 import { useProfile } from "@/lib/contexts/profile-context";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { GuidedTour } from "@/components/guided-tour";
+import { ChatbotConfigDialog } from "@/components/chatbot-config-dialog";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Inventário", href: "/inventory", icon: Package },
+  { name: "Assistente IA", href: "/assistant", icon: Bot },
 ];
 
 export function DashboardHeader() {
@@ -40,6 +42,7 @@ export function DashboardHeader() {
   const [runTour, setRunTour] = useState(false);
   const [isProfileHovered, setIsProfileHovered] = useState(false);
   const [isSettingsHovered, setIsSettingsHovered] = useState(false);
+  const [chatbotConfigOpen, setChatbotConfigOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -208,6 +211,10 @@ export function DashboardHeader() {
                   <Settings className="mr-2 h-4 w-4" />
                   Configurações
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setChatbotConfigOpen(true)}>
+                  <Bot className="mr-2 h-4 w-4" />
+                  Configurar Assistente IA
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-destructive cursor-pointer"
@@ -228,6 +235,10 @@ export function DashboardHeader() {
         onStartTour={() => setRunTour(true)}
       />
       <GuidedTour run={runTour} onComplete={handleTourComplete} />
+      <ChatbotConfigDialog
+        open={chatbotConfigOpen}
+        onOpenChange={setChatbotConfigOpen}
+      />
     </>
   );
 }

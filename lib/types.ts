@@ -119,3 +119,23 @@ export interface ReportData {
     most_wasted: { item: InventoryItem; waste: number }[];
   };
 }
+
+export interface ChartConfig {
+  id: string;
+  user_id: string;
+  llm_provider: string;
+  llm_model: string;
+  api_key: string | null;
+  search_regio: string;
+  enabled_tools: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: string;
+  tool_calls?: any[];
+}
