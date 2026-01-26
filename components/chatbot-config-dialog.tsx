@@ -123,7 +123,7 @@ export function ChatbotConfigDialog({
       } else {
         throw new Error("Failed to save config");
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Erro ao salvar",
         description:
